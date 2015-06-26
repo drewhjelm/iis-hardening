@@ -5,7 +5,7 @@ Write-Host 'Removing IIS and ASP.NET Server identification...'
 Write-Host '--------------------------------------------------------------------------------'
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules /+"[name='Remove_RESPONSE_Server']" /commit:apphost
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].match.serverVariable:'RESPONSE_Server'" "/[name='Remove_RESPONSE_Server'].match.pattern:'.+'" /commit:apphost
-& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].action.type:`"Rewrite`"" "/[name='Remove_RESPONSE_Server'].action.value:`"`""  /commit:apphost
+& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].action.type:`"Rewrite`"" "/[name='Remove_RESPONSE_Server'].action.value:`" `""  /commit:apphost
 
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config /section:httpProtocol "/-customHeaders.[name='X-Powered-By']"
 
@@ -17,19 +17,21 @@ Write-Host 'Setting HTTPS Only'
 Write-Host '--------------------------------------------------------------------------------'
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/rules /+"[name='HTTPS_301_Redirect',stopProcessing='False']" /commit:apphost
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/rules "/[name='HTTPS_301_Redirect',stopProcessing='False'].match.url:`"(.*)`""  /commit:apphost
-& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/rules /+"[name='HTTPS_301_Redirect',stopProcessing='False'].conditions.[input='{HTTPS}',pattern='^OFF$']" /commit:apphost
+& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/rules "/+[name='HTTPS_301_Redirect',stopProcessing='False'].conditions.[input='{HTTPS}',pattern='off']" /commit:apphost
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/rules "/[name='HTTPS_301_Redirect',stopProcessing='False'].action.type:`"Redirect`"" "/[name='HTTPS_301_Redirect',stopProcessing='False'].action.url:`"https://{HTTP_HOST}{REQUEST_URI}`""  /commit:apphost
 
-#precondition for HSTS header
-& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules /+"preConditions.[name='USING_HTTPS']" /commit:apphost
-& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules /+"preConditions.[name='USING_HTTPS'].[input='{HTTPS}',pattern='^ON$']" /commit:apphost
 
 #HSTS header
 Write-Host 'Configuring HSTS header...'
 Write-Host '--------------------------------------------------------------------------------'
+#precondition for HSTS header
+& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules /+"preConditions.[name='USING_HTTPS']" /commit:apphost
+& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules /"+preConditions.[name='USING_HTTPS'].[input='{HTTPS}',pattern='on']" /commit:apphost
+
+#set header
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules /+"[name='Add_HSTS_Header',preCondition='USING_HTTPS']" /commit:apphost
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Add_HSTS_Header'].patternSyntax:`"Wildcard`""  /commit:apphost
-& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].match.serverVariable:`"RESPONSE_Strict-Transport-Security`"" "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].match.pattern:`"*`"" "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].match.pattern:`"*`"" /commit:apphost
+& $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].match.serverVariable:`"RESPONSE_Strict-Transport-Security`"" "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].match.pattern:`"*`"" /commit:apphost
 & $($env:windir + "\system32\inetsrv\appcmd.exe") set config  -section:system.webServer/rewrite/outboundRules "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].action.type:`"Rewrite`"" "/[name='Add_HSTS_Header',preCondition='USING_HTTPS'].action.value:`"max-age=31536000`""  /commit:apphost
 
 #prevent framejacking
