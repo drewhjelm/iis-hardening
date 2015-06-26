@@ -12,7 +12,7 @@ function Set-IISSecurity {
 	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].match.serverVariable:'RESPONSE_Server'" "/[name='Remove_RESPONSE_Server'].match.pattern:`"*`"" /commit:apphost
 	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].action.type:`"Rewrite`"" "/[name='Remove_RESPONSE_Server'].action.value:`" `""  /commit:apphost
 
-	& $($env:windir + "\system32\inetsrv\appcmd.exe") set config /section:httpProtocol "/-customHeaders.[name='X-Powered-By']"
+	& $appcmd set config /section:httpProtocol "/-customHeaders.[name='X-Powered-By']"
 
 	#Enable HTTPS only redirect and add HSTS header
 	#https://www.owasp.org/index.php/HTTP_Strict_Transport_Security#IIS
