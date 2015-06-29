@@ -9,7 +9,7 @@ function Set-IISSecurity {
 	Write-Output '--------------------------------------------------------------------------------'
 	& $appcmd set config  -section:system.webServer/rewrite/outboundRules /+"[name='Remove_RESPONSE_Server']" /commit:apphost
 	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].patternSyntax:`"Wildcard`""  /commit:apphost
-	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].match.serverVariable:'RESPONSE_Server'" "/[name='Remove_RESPONSE_Server'].match.pattern:`"*`"" /commit:apphost
+	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].match.serverVariable:RESPONSE_Server" "/[name='Remove_RESPONSE_Server'].match.pattern:`"*`"" /commit:apphost
 	& $appcmd set config  -section:system.webServer/rewrite/outboundRules "/[name='Remove_RESPONSE_Server'].action.type:`"Rewrite`"" "/[name='Remove_RESPONSE_Server'].action.value:`" `""  /commit:apphost
 
 	& $appcmd set config /section:httpProtocol "/-customHeaders.[name='X-Powered-By']"
