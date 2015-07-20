@@ -1,22 +1,31 @@
-try
-{
-    $client = New-Object System.Net.Sockets.TcpClient
-    $client.Connect('www.google.com', 443)
+function Get-SslCipher {
 
-    $sslStream = New-Object System.Net.Security.SslStream($client.GetStream())
-    $sslStream.AuthenticateAsClient('www.google.com')
+	Param(
+	[Parameter(Mandatory=$true)]
+   [string]$serverName
+	)
 
-    $sslStream | Format-List CipherAlgorithm,CipherStrength,HashAlgorithm,HashStrength,KeyExchangeAlgorithm,KeyExchangeStrength
-}
-finally
-{
-    if ($null -ne $sslStream)
-    {
-        $sslStream.Dispose()
-    }
+	try
+	{
+		$client = New-Object System.Net.Sockets.TcpClient
+		$client.Connect($serverName, 443)
 
-    if ($null -ne $client)
-    {
-        $client.Dispose()
-    }
+		$sslStream = New-Object System.Net.Security.SslStream($client.GetStream())
+		$sslStream.AuthenticateAsClient($serverName)
+
+		$sslStream | Format-List CipherAlgorithm,CipherStrength,HashAlgorithm,HashStrength,KeyExchangeAlgorithm,KeyExchangeStrength
+	}
+	finally
+	{
+		if ($null -ne $sslStream)
+		{
+			$sslStream.Dispose()
+		}
+
+		if ($null -ne $client)
+		{
+			$client.Dispose()
+		}
+	}
+
 }
